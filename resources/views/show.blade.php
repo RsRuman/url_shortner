@@ -19,10 +19,10 @@
 
                         <div class="flex items-center border-b border-teal-500 py-2">
                             <input class="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none" type="text"
-                                   placeholder="Enter the link here" aria-label="Full URL" name="original_url"
+                                   placeholder="Enter the link here" aria-label="Full URL" name="short_url" id="shortUrl"
                                    value="{{ env('APP_URL') . '/' . $url->short_url }}">
 
-                            <button class="flex-shrink-0 bg-teal-500 hover:bg-teal-700 border-teal-500 hover:border-teal-700 text-sm border-4 text-white py-1 px-2 rounded" type="button">
+                            <button onclick="copyToClipboard()" class="flex-shrink-0 bg-teal-500 hover:bg-teal-700 border-teal-500 hover:border-teal-700 text-sm border-4 text-white py-1 px-2 rounded" type="button">
                                 Copy URL
                             </button>
                         </div>
@@ -36,4 +36,19 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('js')
+    <script>
+        function copyToClipboard() {
+            const copyText = document.getElementById("shortUrl");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // For mobile devices
+            navigator.clipboard.writeText(copyText.value).then(function() {
+                alert("Copied the text: " + copyText.value);
+            }, function(err) {
+                console.error('Async: Could not copy text: ', err);
+            });
+        }
+    </script>
 @endsection

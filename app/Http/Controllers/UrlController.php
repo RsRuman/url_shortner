@@ -65,7 +65,7 @@ class UrlController extends Controller
     public function show(Request $request): View
     {
         if ($request->has('id')) {
-            $url = $this->urlShortenerRepository->getUrlById($request->has('id'));
+            $url = $this->urlShortenerRepository->getUrlById($request->input('id'));
 
             return view('show', compact('url'));
         }
