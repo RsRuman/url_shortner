@@ -7,8 +7,10 @@ use App\Http\Requests\UrlInputRequest;
 use App\Interfaces\UrlShortenerInterface;
 use App\Traits\Shortener;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Contracts\View\View;
+use Random\RandomException;
 
 #[AllowDynamicProperties]
 class UrlController extends Controller
@@ -20,11 +22,21 @@ class UrlController extends Controller
         $this->urlShortenerRepository = $urlShortenerRepository;
     }
 
+    /**
+     * Home or Landing page
+     * @return View
+     */
     public function index(): View
     {
         return view('home');
     }
 
+    /**
+     * Create short url and store in database
+     * @param UrlInputRequest $request
+     * @return RedirectResponse
+     * @throws RandomException
+     */
     public function createShortUrl(UrlInputRequest $request): RedirectResponse
     {
         $data = $request->validated();
@@ -45,10 +57,35 @@ class UrlController extends Controller
         return redirect()->route('shortener.show', ['id' => $url->id])->with('success', 'URL shorted successfully.')->setStatusCode(HttpResponse::HTTP_CREATED);
     }
 
-    public function show($id): View
+    /**
+     * Showing short url result
+     * @param Request $request
+     * @return View
+     */
+    public function show(Request $request): View
     {
-        $url = $this->urlShortenerRepository->getUrlById($id);
+        if ($request->has('id')) {
+            $url = $this->urlShortenerRepository->getUrlById($request->has('id'));
 
-        return view('show', compact('url'));
+            return view('show', compact('url'));
+        }
+
+        return view('home');
+    }
+
+    /**
+     * Redirect to original url when browse short url
+     * @param $shortUrl
+     * @return RedirectResponse
+     */
+    public function redirect($shortUrl): RedirectResponse
+    {
+        $url = $this->urlShortenerRepository->findUrlByShort($shortUrl);
+
+        if (!$url) {
+            return abort(404);
+        }
+
+        return redirect($url->original_url);
     }
 }
